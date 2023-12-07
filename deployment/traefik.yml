@@ -1,0 +1,37 @@
+api:
+  insecure: true
+  dashboard: true
+accessLog: {}
+providers:
+  docker:
+    exposedByDefault: false
+    network: deployment_proxy # might need to change this
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+  https:
+    address: ":443"
+  grpc:
+    address: ":8000"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      tlsChallenge: {}
+      email: "acme@asdasd.com" # Replace with your email
+      storage: /etc/traefik/acme/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+  letsencrypt_wild:
+    acme:
+      dnsChallenge:
+        provider: manual
+      email: "acme@asdasd.com" # Replace with your email
+      storage: /etc/traefik/acme/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+log:
+  level: DEBUG
