@@ -1,5 +1,5 @@
 {
-  "whmcs": { "site_url": "" },
+  "whmcs": { "site_url": "https://whmcs.example.com/" },
   "app": {
     "folder": "app_back/v1",
     "title": "Multi-cloud",
