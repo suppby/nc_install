@@ -196,7 +196,7 @@ CheckSSL() {
                         fi
                 done
 
-                if [ "$try" -ge "5" ]; then
+                if [ "$try" -ge "20" ]; then
                         Error "Error SSL issue. Some services may work incorrectly. Pls check traefik logs: docker logs deployment-proxy-1"
                         break
                 fi
