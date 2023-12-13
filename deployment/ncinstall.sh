@@ -159,7 +159,7 @@ FillEnv() {
 }
 
 EditConfigs() {
-        chmod 600 ./deployment/letsencrypt/acme.json
+        chmod 600 ./letsencrypt/acme.json
         sed -i "s/acme@example.com/$email/g" ./traefik.yml
         sed -i "s/REPLACE_ME/$whmcs_url/g" ./app_config/config.json
         touch oauth2_config.json
