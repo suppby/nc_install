@@ -207,8 +207,8 @@ CheckSSL() {
 }
 
 BootstrapDB() {
-		Warning "Creating examples..."
-		sleep 30
+	Warning "Creating examples..."
+	sleep 30
         arango_container_name=$(docker ps --format "{{.Names}}"| grep db)
         arango_root_pass=$(cat .env | grep DB_PASS | cut -d\= -f2)
         arango_restore_command="/usr/bin/arangorestore --input-directory /arango_dump_nocloud_example/nocloud --server.database nocloud --server.password $arango_root_pass"
