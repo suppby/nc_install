@@ -15,16 +15,15 @@ Error()
         printf "\033[1;31m$@\033[0m\n"
 }
 
-
 AcceptEULA() {
-while true; do
-    read -p "Do you accept EULA https://support.pl/EULA......? " yn
-    case $yn in
-        [Yy]* ) Info "EULA accepted"; EULA_accepted=true; break;;
-        [Nn]* ) Error "EULA not accepted. Pls contact us nocloud@support.pl"; exit 1;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+		while true; do
+			read -p "Do you accept EULA https://support.pl/EULA......? " yn
+			case $yn in
+				[Yy]* ) Info "EULA accepted"; EULA_accepted=true; break;;
+				[Nn]* ) Error "EULA not accepted. Pls contact us nocloud@support.pl"; exit 1;;
+				* ) echo "Please answer yes or no.";;
+			esac
+		done
 }
 
 CheckRoot() {
@@ -52,16 +51,19 @@ OSDetect() {
                 Linux)
                 if [ -f /etc/redhat-release ] || [ -f /etc/centos-release ]; then
                         export OSFAMILY=REDHAT
+						yum install bind-utils -y
                 elif [ -f /etc/debian_version ]; then
                         export OSFAMILY=DEBIAN
+						apt-get install bind9-host -y
                 fi
                 ;;
                 FreeBSD)
                         export OSFAMILY=FREEBSD
+						Error "FreeBSD not supported, only Linux."
                 ;;
         esac
         if [ "#${OSFAMILY}" = "#unknown" ]; then
-                Error "Unknown os type."
+                Error "Unknown os type. Only supported: CentOS, Debian, Fedora, Ubuntu."
                 exit 1
         fi
         Info "OK. Found OS family $OSFAMILY."
@@ -72,6 +74,7 @@ CheckSELinux() {
         if [ "$OSFAMILY" = "REDHAT" ]; then
                 if selinuxenabled > /dev/null 2>&1 ; then
                         Error "SELinux is enabled, aborting installation. Please disable SELinux."
+						Info "HowTo: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/sec-sel-enable-disable"
                         exit 1
                 else
                         Info "OK. SELinux disabled."
@@ -84,6 +87,7 @@ CheckAppArmor() {
         if [ "$OSFAMILY" = "DEBIAN" ]; then
                 if service apparmor status >/dev/null 2>&1 ; then
                         Error "AppArmor is enabled, aborting installation. Please stop and disable AppArmor."
+						Info "HowTo: https://help.ubuntu.com/community/AppArmor"
                         exit 1
                 else
                         Info "OK. AppArmor disabled."
@@ -105,8 +109,6 @@ CheckProcInstructions() {
 AskForVars() {
         echo -n "Write base domain, like nocloud.example.com: "
         read base_domain
-        echo -n "Write nocloud admin password: "
-        read nc_root_pass
         echo -n "Write email for letsencrypt: "
         read email
         echo -n "Write WHMCS site url, like https://whmcs.example.com/: "
@@ -117,7 +119,7 @@ CheckDomainAvailability() {
         domains=(traefik.$base_domain rbmq.$base_domain api.$base_domain db.$base_domain app.$base_domain)
 
         for domain in ${domains[@]}; do
-                if ping -c1 "$domain" >/dev/null 2>&1; then
+                if host "$domain" >/dev/null 2>&1; then
                         Info "OK. Domain $domain resolved successfully."
                         sleep 1
                 else
@@ -126,7 +128,6 @@ CheckDomainAvailability() {
                         exit 1
                 fi
         done
-
 }
 
 InstallDocker() {
@@ -152,12 +153,13 @@ FillEnv() {
         echo RABBITMQ_USER=nocloud >> .env
         echo RABBITMQ_PASS=$(cat /dev/urandom | tr -dc a-zA-Z0-9 | head -c20; echo) >> .env
         echo BASE_DOMAIN=$base_domain >> .env
+		nc_root_pass=$(cat /dev/urandom | tr -dc a-zA-Z0-9 | head -c20; echo)
         echo NOCLOUD_ROOT_PASS=$nc_root_pass >> .env
         echo EULA_accepted=$EULA_accepted >> .env
 }
 
 EditConfigs() {
-        chmod 600 ./letsencrypt/acme.json
+        chmod 600 ./deployment/letsencrypt/acme.json
         sed -i "s/acme@example.com/$email/g" ./traefik.yml
         sed -i "s/REPLACE_ME/$whmcs_url/g" ./app_config/config.json
         touch oauth2_config.json
@@ -175,7 +177,7 @@ CheckSSL() {
         while $sslerror; do
 
                 Warning "Waiting before issue Let's Encrypt. Attempt $try "
-                for (( waiting=1; waiting<=10; waiting++ )); do
+                for (( waiting=1; waiting<=60; waiting++ )); do
                         echo -n "."
                         sleep 1
                 done
@@ -194,7 +196,7 @@ CheckSSL() {
                         fi
                 done
 
-                if [ "$try" -ge "20" ]; then
+                if [ "$try" -ge "10" ]; then
                         Error "Error SSL issue. Some services may work incorrectly. Pls check traefik logs: docker logs deployment-proxy-1"
                         break
                 fi
@@ -204,6 +206,8 @@ CheckSSL() {
 }
 
 BootstrapDB() {
+		Warning "Creating examples..."
+		sleep 30
         arango_container_name=$(docker ps --format "{{.Names}}"| grep db)
         arango_root_pass=$(cat .env | grep DB_PASS | cut -d\= -f2)
         arango_restore_command="/usr/bin/arangorestore --input-directory /arango_dump_nocloud_example/nocloud --server.database nocloud --server.password $arango_root_pass"
@@ -223,7 +227,9 @@ FinishSetup() {
 
         Warning "DOCUMENTATION: https://github.com/slntopp/nocloud/wiki/Production"
         echo "===================================================================="
+
 }
+
 
 AcceptEULA
 CheckRoot
@@ -239,14 +245,5 @@ FillEnv
 EditConfigs
 StartNocloud
 CheckSSL
-
-while true; do
-    read -p "Do you wish to create example price model and SP? " yn
-    case $yn in
-        [Yy]* ) Warning "Creating examples..."; sleep 30; BootstrapDB; break;;
-        [Nn]* ) exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
-
+BootstrapDB
 FinishSetup
