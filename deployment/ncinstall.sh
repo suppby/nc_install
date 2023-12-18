@@ -17,7 +17,6 @@ Error()
 
 
 AcceptEULA() {
-
 while true; do
     read -p "Do you accept EULA https://support.pl/EULA......? " yn
     case $yn in
@@ -45,7 +44,6 @@ CheckRoot() {
         Info "OK. You are root, this is good."
         sleep 1
 }
-
 
 OSDetect() {
         OSFAMILY=unknown
@@ -206,7 +204,6 @@ CheckSSL() {
 }
 
 BootstrapDB() {
-
         arango_container_name=$(docker ps --format "{{.Names}}"| grep db)
         arango_root_pass=$(cat .env | grep DB_PASS | cut -d\= -f2)
         arango_restore_command="/usr/bin/arangorestore --input-directory /arango_dump_nocloud_example/nocloud --server.database nocloud --server.password $arango_root_pass"
@@ -214,7 +211,6 @@ BootstrapDB() {
         /usr/bin/tar -xzf arango_dump_nocloud_example.tar.gz
         docker cp arango_dump_nocloud_example ${arango_container_name}:arango_dump_nocloud_example > /dev/null 2>&1
         docker exec -d $arango_container_name $arango_restore_command
-
 }
 
 FinishSetup() {
@@ -227,9 +223,7 @@ FinishSetup() {
 
         Warning "DOCUMENTATION: https://github.com/slntopp/nocloud/wiki/Production"
         echo "===================================================================="
-
 }
-
 
 AcceptEULA
 CheckRoot
