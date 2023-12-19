@@ -21,7 +21,7 @@ AcceptEULA() {
 			read -p "Please answer yes or no: " yn
 			case $yn in
 				[Yy]* ) Info "EULA accepted"; EULA_accepted=true; break;;
-				[Nn]* ) Error "EULA not accepted. Pls contact us nocloud@support.pl"; exit 1;;
+				[Nn]* ) Error "EULA not accepted. Pls contact us info@support.pl"; exit 1;;
 				* ) echo "Please answer yes or no.";;
 			esac
 		done
