@@ -18,5 +18,5 @@ Run script and follow instructions:
 - pass or Token
 - schedr rules
 - DataStore schedr rules
-- Public IPs Pool ID
+- Public IPs Pool ID  
   Change it with your opennebula credentials\variables.
