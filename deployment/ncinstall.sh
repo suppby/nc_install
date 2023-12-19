@@ -17,7 +17,7 @@ Error()
 
 AcceptEULA() {
 		while true; do
-  			Warning "Do you accept EULA https://support.pl/EULA......?"
+  			Warning "Do you accept EULA https://nocloud.zone?"
 			read -p "Please answer yes or no: " yn
 			case $yn in
 				[Yy]* ) Info "EULA accepted"; EULA_accepted=true; break;;
@@ -52,15 +52,15 @@ OSDetect() {
                 Linux)
                 if [ -f /etc/redhat-release ] || [ -f /etc/centos-release ]; then
                         export OSFAMILY=REDHAT
-						yum install bind-utils -y
+			yum install bind-utils -y
                 elif [ -f /etc/debian_version ]; then
                         export OSFAMILY=DEBIAN
-						apt-get install bind9-host -y
+		        apt-get install bind9-host -y
                 fi
                 ;;
                 FreeBSD)
                         export OSFAMILY=FREEBSD
-						Error "FreeBSD not supported, only Linux."
+			Error "FreeBSD not supported, only Linux."
                 ;;
         esac
         if [ "#${OSFAMILY}" = "#unknown" ]; then
@@ -75,7 +75,7 @@ CheckSELinux() {
         if [ "$OSFAMILY" = "REDHAT" ]; then
                 if selinuxenabled > /dev/null 2>&1 ; then
                         Error "SELinux is enabled, aborting installation. Please disable SELinux."
-						Info "HowTo: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/sec-sel-enable-disable"
+			Info "HowTo: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/sec-sel-enable-disable"
                         exit 1
                 else
                         Info "OK. SELinux disabled."
@@ -88,7 +88,7 @@ CheckAppArmor() {
         if [ "$OSFAMILY" = "DEBIAN" ]; then
                 if service apparmor status >/dev/null 2>&1 ; then
                         Error "AppArmor is enabled, aborting installation. Please stop and disable AppArmor."
-						Info "HowTo: https://help.ubuntu.com/community/AppArmor"
+			Info "HowTo: https://help.ubuntu.com/community/AppArmor"
                         exit 1
                 else
                         Info "OK. AppArmor disabled."
@@ -154,7 +154,7 @@ FillEnv() {
         echo RABBITMQ_USER=nocloud >> .env
         echo RABBITMQ_PASS=$(cat /dev/urandom | tr -dc a-zA-Z0-9 | head -c20; echo) >> .env
         echo BASE_DOMAIN=$base_domain >> .env
-		nc_root_pass=$(cat /dev/urandom | tr -dc a-zA-Z0-9 | head -c20; echo)
+	nc_root_pass=$(cat /dev/urandom | tr -dc a-zA-Z0-9 | head -c20; echo)
         echo NOCLOUD_ROOT_PASS=$nc_root_pass >> .env
         echo EULA_accepted=$EULA_accepted >> .env
 }
