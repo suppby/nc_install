@@ -12,11 +12,10 @@ Run script and follow instructions:
 
 ### Opennebula as services provider
 1. Install opennebula. System requirements: https://docs.opennebula.io/stable/intro_release_notes/release_notes/platform_notes.html
-2. After Nocloud installation you must edit example service provider "Demo Opennebula" in Nocloud admin area. Vars to change:
+2. After Nocloud installation you must edit example service provider "Demo Opennebula" in Nocloud admin area. Change it with your opennebula credentials\variables:
 - Proxy
 - Host
 - pass or Token
 - schedr rules
 - DataStore schedr rules
-- Public IPs Pool ID  
-  Change it with your opennebula credentials\variables.
+- Public IPs Pool ID
