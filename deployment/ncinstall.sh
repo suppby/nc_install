@@ -108,11 +108,11 @@ CheckProcInstructions() {
 }
 
 AskForVars() {
-        echo -n "Write base domain, like nocloud.example.com: "
+        echo -n "Write base domain, like nocloud.example.tld: "
         read base_domain
         echo -n "Write email for letsencrypt: "
         read email
-        echo -n "Write WHMCS site url, like https://whmcs.example.com/: "
+        echo -n "Write WHMCS site url, like https://whmcs.example.tld/: "
         read whmcs_url
 }
 
